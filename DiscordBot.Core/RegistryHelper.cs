@@ -102,6 +102,8 @@ namespace DiscordBot.Core
         private const string DebugLogFileSubKey = "DebugLogFileEnabled";
         //ログファイル出力フラグ値
         private const bool DefaultDebugLogFileEnabled = false;
+        //ログファイル出力サイズ値(100MB)
+        private const int DebugLogFileSize = 100;
         //---------- Licenseファイル情報 ----------
         private const string LicenseRawSubKey = "LicenseRaw";
         private const string IsActivatedKey = "IsActivated";
@@ -674,6 +676,22 @@ namespace DiscordBot.Core
             string fullPath = $"{BaseRegistryPath}\\{MainBotSubKey}";
             // boolean を DWORD (0または1) で保存
             SetDwordSetting(fullPath, DebugLogFileSubKey, isEnabled ? 1U : 0U);
+        }
+        //デバッグログのファイル出力最大書き込みサイズをレジストリから読み込み
+        public static int LoadDebugLogFileSize()
+        {
+            string fullPath = $"{BaseRegistryPath}\\{MainBotSubKey}";
+            uint value = GetDwordSetting(fullPath, "DebugLogFileSize", (uint)DebugLogFileSize);
+
+            //最小値を保証 (例えば 10ms)
+            return (int)Math.Max(value, 1);
+        }
+        //デバッグログのファイル出力最大書き込みサイズをレジストリに保存
+        public static void SaveDebugLogFileSize(int maxSizeMb)
+        {
+            string fullPath = $"{BaseRegistryPath}\\{MainBotSubKey}";
+            //最小値を保証 (1ms未満は保存しない)
+            SetDwordSetting(fullPath, "DebugLogFileSize", (uint)Math.Max(maxSizeMb, 1));
         }
         //--- 天気予報プラグイン設定 ---
         //[天気予報]天気予報のデータキャッシュ時間(分)を取得

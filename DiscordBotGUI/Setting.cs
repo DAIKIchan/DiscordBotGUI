@@ -30,7 +30,7 @@ namespace DiscordBotGUI
         //デバッグログフラグ再読み込み用イベントデリゲートを定義(メインフォームで使用)
         public event Action DebugSettingChanged;
         //デリゲートの定義 (新しい設定値を引数として渡す)
-        public delegate void LogPerformanceSettingUpdateHandler(int newBatchSize, int newDelayMs);
+        public delegate void LogPerformanceSettingUpdateHandler(int newBatchSize, int newDelayMs, bool newIsLogFileEnabled, int newMaxFileSizeMb);
         //イベントの定義
         public event LogPerformanceSettingUpdateHandler LogPerformanceSettingChanged;
         readonly System.Windows.Forms.ToolTip toolTip = new System.Windows.Forms.ToolTip();
@@ -131,6 +131,10 @@ namespace DiscordBotGUI
                 bool isLogFileEnabled = ChkWriteLogFile.Checked;
                 RegistryHelper.SaveDebugLogFileEnabled(isLogFileEnabled);
                 _logger?.Log($"[INFO] ログファイル出力設定を保存：[{isLogFileEnabled}]", (int)LogType.Debug);
+                //ログファイルサイズの保存
+                int maxFileSize = (int)NumLogFileSize.Value;
+                RegistryHelper.SaveDebugLogFileSize(maxFileSize);
+                _logger?.Log($"[INFO] ログファイル最大サイズを保存：[{maxFileSize} MB]", (int)LogType.Debug);
                 //Debugログ変更通知イベント
                 if (_debuglog != ChkDebugLog.Checked)
                 {
@@ -146,7 +150,7 @@ namespace DiscordBotGUI
                     //レジストリへの保存処理はここより上で行われている前提
 
                     //イベントを発火させ、新しい設定値をメインフォームに渡す
-                    LogPerformanceSettingChanged?.Invoke(newSettings.Value.BatchSize, newSettings.Value.DelayMs);
+                    LogPerformanceSettingChanged?.Invoke(newSettings.Value.BatchSize, newSettings.Value.DelayMs, isLogFileEnabled, maxFileSize);
                 }
                 _logger.Log($"[INFO] フォームの終了位置記憶フラグ：[{FormSetting.Checked}]", (int)LogType.Debug);
                 //前回フォーム位置フラグ
@@ -232,17 +236,17 @@ namespace DiscordBotGUI
             }
         }
         //フォルダ選択ダイアログ表示
-        public static string SelectFolder(System.IntPtr parentHandle)
+        public static string SelectFolder(System.IntPtr parentHandle, string initialPath = "", string title = "フォルダを選択してください!!")
         {
             using (CommonOpenFileDialog dialog = new CommonOpenFileDialog())
             {
                 //フォルダのみ選択可能にする
                 dialog.IsFolderPicker = true;
                 //初期ディレクトリ
-                dialog.InitialDirectory = "C:\\";
+                dialog.InitialDirectory = Directory.Exists(initialPath) ? initialPath : @"C:\";
                 //ネットワークフォルダを許可
                 dialog.AllowNonFileSystemItems = true;
-                dialog.Title = "フォルダを選択してください!!";
+                dialog.Title = title;
 
                 if (dialog.ShowDialog(parentHandle) == CommonFileDialogResult.Ok)
                 {
@@ -252,14 +256,24 @@ namespace DiscordBotGUI
             }
             return null;
         }
-        //参照ボタンクリック時
-        private void BtnStart_Click(object sender, EventArgs e)
+        //参照ボタンクリック時(コマンドコンフィグパス)
+        private void BtnOpenCmd_Click(object sender, EventArgs e)
         {
-            string selectedPath = SelectFolder(this.Handle);
+            // タイトルを指定（またはデフォルトのまま）
+            string selectedPath = SelectFolder(this.Handle, TxtConfig.Text, "フォルダを選択してください!!");
             if (!string.IsNullOrEmpty(selectedPath))
             {
-                //選択したフォルダパスを表示
                 TxtConfig.Text = selectedPath;
+            }
+        }
+        //参照ボタンクリック時(ログフォルダパス)
+        private void BtnOpenFolder_Click(object sender, EventArgs e)
+        {
+            // タイトルを指定（またはデフォルトのまま）
+            string selectedPath = SelectFolder(this.Handle, TxtLogFolder.Text, "ログフォルダを選択してください!!");
+            if (!string.IsNullOrEmpty(selectedPath))
+            {
+                TxtLogFolder.Text = selectedPath;
             }
         }
         //設定値を対応するチェックボックスに反映させるローカル関数
@@ -321,6 +335,8 @@ namespace DiscordBotGUI
             TxtConfig.Text = Properties.Settings.Default.CmdConfigPath;
             //前回フォーム位置を記憶フラグ
             FormSetting.Checked = Properties.Settings.Default.FormSetting;
+            //ログフォルダパス
+            TxtLogFolder.Text = Properties.Settings.Default.LogFilePath;
             //コマンドメッセージ削除設定フラグのロード
             bool shouldDelete = RegistryHelper.LoadDeleteCommandMessageSetting();
             //デバッグログの出力を有効フラグのロード
@@ -330,6 +346,8 @@ namespace DiscordBotGUI
             //ログ性能設定のロード
             int logBatchSize = RegistryHelper.LoadLogBatchSize();
             int uiTaskDelayMs = RegistryHelper.LoadUITaskDelayMs();
+            //ログ出力サイズのロード
+            int logFileSize = RegistryHelper.LoadDebugLogFileSize();
             //ロードした設定値をチェックボックスにセット
             SetCheckboxState("ChkDeleteCommandMessage", shouldDelete);
             _logger.Log($"[INFO] チェックボックス：[入力されたコマンドの自動削除を有効]の設定値をロード!!", (int)LogType.Debug);
@@ -347,6 +365,11 @@ namespace DiscordBotGUI
             {
                 numDelayMs.Value = uiTaskDelayMs;
                 _logger.Log($"[INFO] NumUITaskDelayMs：[UI待機時間(ms)]の値[{uiTaskDelayMs}]をロード!!", (int)LogType.Debug);
+            }
+            if (Controls.Find("NumLogFileSize", true).FirstOrDefault() is NumericUpDown numLogFileSize)
+            {
+                numLogFileSize.Value = logFileSize;
+                _logger.Log($"[INFO] NumLogFileSize：[ログファイルサイズ(MB)]の値[{logFileSize}]をロード!!", (int)LogType.Debug);
             }
             //チェックボックスに説明文を設定
             toolTip.SetToolTip(FormSetting, "前回閉じた座標でフォームが起動します!!");
@@ -444,6 +467,11 @@ namespace DiscordBotGUI
                 //メソッド終了ログ
                 _logger.Log($"[INFO] Setting_Activatedイベントを終了!!", (int)LogType.Debug);
             }
+        }
+
+        private void ChkWriteLogFile_CheckedChanged(object sender, EventArgs e)
+        {
+            NumLogFileSize.Enabled = ChkWriteLogFile.Checked;
         }
     }
 }

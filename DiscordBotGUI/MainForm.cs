@@ -8,9 +8,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -51,6 +53,9 @@ namespace DiscordBotGUI
         private bool _isDebugLogEnabled = false;
         //ログファイル出力フラグ
         private bool _isLogFileEnabled = false;
+        //ログファイル最大サイズ
+        private int _maxLogFileSizeMb = 1024;
+        string currentVersion = Application.ProductVersion;
         //設定ファイルでファイルパスまで入っている為
         private string ConfigDirectory
         {
@@ -99,7 +104,7 @@ namespace DiscordBotGUI
         private int _uiTaskDelayMs;
         //製品情報
         private const string PGUniqueVersion = "BOT-000001";
-        string PGVersion = "[Ver1.2.6.36]";
+        string PGVersion = "[Ver1.2.7.37]";
         private readonly ILogger _mainForm;
         private readonly ILogger _appForm;
         //DLLがアクセスできるインターフェース
@@ -230,17 +235,19 @@ namespace DiscordBotGUI
             };
         }
         //設定値を更新するパブリックメソッド
-        public void UpdateLogPerformanceSettings(int newBatchSize, int newDelayMs)
+        public void UpdateLogPerformanceSettings(int newBatchSize, int newDelayMs, bool newIsFileLogEnabled, int newMaxFileSizeMb)
         {
             // 新しい値をインスタンス変数に反映
             _logBatchSize = newBatchSize;
             _uiTaskDelayMs = newDelayMs;
-
+            _isLogFileEnabled = newIsFileLogEnabled;
+            _maxLogFileSizeMb = newMaxFileSizeMb;
             // ログに反映されたことを出力
             Log($"[INFO] ログパフォーマンス設定を更新しました!!", LogType.Debug);
             Log($"[INFO] 新しいバッチサイズ：[{newBatchSize}]", LogType.Debug);
             Log($"[INFO] 新しいUI待機時間：[{newDelayMs} ms]", LogType.Debug);
-
+            Log($"[INFO] ログファイル出力を {(newIsFileLogEnabled ? "有効" : "無効")} に切り替えました!!", LogType.Debug);
+            Log($"[INFO] ログ設定を更新：サイズ上限 [{newMaxFileSizeMb} MB]", LogType.Debug);
             // 注意: ProcessLogQueue メソッド内でこれらの変数が参照されていれば、
             // 次のループから新しい値で動作します。
         }
@@ -251,9 +258,13 @@ namespace DiscordBotGUI
             _logBatchSize = DiscordBot.Core.RegistryHelper.LoadLogBatchSize();
             //待機時間を制御し、CPU負荷を軽減
             _uiTaskDelayMs = DiscordBot.Core.RegistryHelper.LoadUITaskDelayMs();
+            //レジストリからフラグを読み込む
+            _isLogFileEnabled = DiscordBot.Core.RegistryHelper.LoadDebugLogFileEnabled();
+            //ファイルサイズ上限の読み込み
+            _maxLogFileSizeMb = DiscordBot.Core.RegistryHelper.LoadDebugLogFileSize();
             _logCts = new CancellationTokenSource();
             _logProcessorTask = ProcessLogQueue(_logCts.Token);
-            Log($"ログパフォーマンスStart：{_logProcessorTask}", LogType.Debug);
+            Log($"ログシステムStart：Batch=[{_logBatchSize}], Delay=[{_uiTaskDelayMs} ms], MaxSize=[{_maxLogFileSizeMb} MB]", LogType.Debug);
         }
 
         private void StopLogProcessor()
@@ -266,6 +277,45 @@ namespace DiscordBotGUI
                 _logCts = null;
                 _logProcessorTask = null;
                 Log($"ログパフォーマンスStop：null", LogType.Debug);
+            }
+        }
+        private void WriteLogBatchToFile(List<(string Message, LogType Type)> batch)
+        {
+            if (!_isLogFileEnabled || batch.Count == 0) return;
+
+            try
+            {
+                //実行ファイルと同じ階層の "logs" フォルダに出力
+                string logDir = @"C:\DiscordBotGUI\Log";
+                if (!Directory.Exists(logDir)) Directory.CreateDirectory(logDir);
+
+                //基本のファイル名 (例：log_20260102)
+                string baseFileName = $"log_{DateTime.Now:yyyyMMdd}";
+                string filePath = Path.Combine(logDir, $"{baseFileName}.log");
+                //--- ファイル分割ロジック ---
+                //設定された最大サイズ (MB) をバイト換算
+                long maxByteSize = _maxLogFileSizeMb * 1024 * 1024;
+
+                int suffix = 1;
+                // ファイルが存在し、かつサイズが上限を超えている間、ファイル名を更新し続ける
+                while (File.Exists(filePath) && new FileInfo(filePath).Length >= maxByteSize)
+                {
+                    filePath = Path.Combine(logDir, $"{baseFileName}_{suffix}.log");
+                    suffix++;
+                }
+                using (var sw = new StreamWriter(filePath, true, System.Text.Encoding.UTF8))
+                {
+                    foreach (var log in batch)
+                    {
+                        // [時刻] [種別] メッセージ の形式
+                        sw.WriteLine($"[{DateTime.Now:HH:mm:ss}] [{log.Type}] {log.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // ここでのエラーはログ出力できないため、デバッグ出力のみ
+                System.Diagnostics.Debug.WriteLine($"LogFile Error: {ex.Message}");
             }
         }
         //1分ごとに実行され、日付が変わった場合にライセンスを再検証
@@ -2375,6 +2425,8 @@ namespace DiscordBotGUI
                 {
                     var logsToSend = batch.ToList();
                     batch.Clear();
+                    //バックグラウンドスレッドのままファイルに書き込む
+                    WriteLogBatchToFile(logsToSend);
 
                     if (!this.IsDisposed && this.IsHandleCreated)
                     {
@@ -2615,6 +2667,38 @@ namespace DiscordBotGUI
             catch (Exception ex)
             {
                 Log($"[ERROR] デバッグログ設定の再読み込みに失敗しました!!\n{ex.Message}", LogType.Error);
+            }
+        }
+        private async Task StartUpdate(string downloadUrl)
+        {
+            string tempPath = Path.Combine(Path.GetTempPath(), "DiscordBotGUI_new.exe");
+            string currentPath = Process.GetCurrentProcess().MainModule.FileName;
+            string updaterPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Updater.exe");
+
+            try
+            {
+                // 1. 新しいEXEを一時フォルダにダウンロード
+                using (var client = new HttpClient())
+                {
+                    var bytes = await client.GetByteArrayAsync(downloadUrl);
+                    File.WriteAllBytes(tempPath, bytes);
+                }
+
+                // 2. Updaterを起動して引数を渡す
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = updaterPath,
+                    Arguments = $"\"{tempPath}\" \"{currentPath}\" \"DiscordBotGUI\"",
+                    UseShellExecute = true
+                };
+                Process.Start(startInfo);
+
+                // 3. 自分自身（メインアプリ）を終了させる
+                Application.Exit();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"アップデートの準備中にエラーが発生しました!!\n例外：{ex.Message}");
             }
         }
         //設定フォーム
@@ -3042,6 +3126,63 @@ namespace DiscordBotGUI
                 string ErrorType = ex.GetType().Name;
                 string ErrorMessage = ex.Message;
                 MessageBox.Show("※" + ErrorMessage, ErrorType, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        //アップデート確認
+        private async void UpdateCheckToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // あなたのリポジトリ情報に合わせて書き換えてください
+            string owner = "DAIKIchan";
+            string repo = "DiscordBotGUI";
+            string url = $"https://api.github.com/repos/{owner}/{repo}/releases/latest";
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    // GitHub APIにはUser-Agentヘッダーが必須です
+                    client.DefaultRequestHeaders.Add("User-Agent", "DiscordBotGUI-Updater");
+
+                    var response = await client.GetStringAsync(url);
+                    dynamic release = JsonConvert.DeserializeObject(response);
+
+                    // GitHubのタグ名（例: "v1.0.1"）を取得
+                    string latestTag = release.tag_name;
+                    string cleanVersion = latestTag.Replace("v", ""); // "v"を除去して比較しやすくする
+
+                    Version latestVersion = new Version(cleanVersion);
+                    Version myVersion = new Version(Application.ProductVersion);
+
+                    if (latestVersion > myVersion)
+                    {
+                        //リリースの説明文
+                        string body = release.body;
+                        //EXEの直リンクを取得
+                        string downloadUrl = release.assets[0].browser_download_url;
+                        var result = MessageBox.Show(
+                            $"新しいバージョン [{latestTag}] が見つかりました!!\n\n【更新内容】\n{body}\n\nアップデートページを開きますか？",
+                            "アップデートあり",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Information);
+
+                        if (result == DialogResult.Yes)
+                        {
+                            await StartUpdate(downloadUrl);
+                            // ブラウザでGitHubのリリースページを開く
+                            //string htmlUrl = release.html_url;
+                            //Process.Start(new ProcessStartInfo(htmlUrl) { UseShellExecute = true });
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("現在のバージョンは最新です!!", "アップデート確認", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"[ERROR] アップデート確認中にエラーが発生しました!!\n例外：{ex.Message}", LogType.DebugError);
+                MessageBox.Show("アップデート情報の取得に失敗しました!!", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

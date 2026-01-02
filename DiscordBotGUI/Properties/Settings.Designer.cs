@@ -39,6 +39,22 @@ namespace DiscordBotGUI.Properties {
             }
         }
         
+        /// <summary>
+        /// ログファイルのフォルダパス
+        /// </summary>
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsDescriptionAttribute("ログファイルのフォルダパス")]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\DiscordBotGUI")]
+        public string LogFilePath {
+            get {
+                return ((string)(this["LogFilePath"]));
+            }
+            set {
+                this["LogFilePath"] = value;
+            }
+        }
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]

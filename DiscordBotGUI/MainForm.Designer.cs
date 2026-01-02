@@ -43,16 +43,18 @@
             this.MessageBulkDeletionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.UserBanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.UserKickToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.RoleSettingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.WeatherInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.JoiningLeavingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ProductToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.VersionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.LicenseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.UpdateCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.BtnReloadAllPlugins = new System.Windows.Forms.Button();
             this.BtnReleaseAllPlugins = new System.Windows.Forms.Button();
             this.BtnReloadAllCommand = new System.Windows.Forms.Button();
             this.licenseCheckTimer = new System.Windows.Forms.Timer(this.components);
-            this.RoleSettingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tESTToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -192,6 +194,14 @@
             this.UserKickToolStripMenuItem.Text = "ユーザKICK";
             this.UserKickToolStripMenuItem.Click += new System.EventHandler(this.UserKickToolStripMenuItem_Click);
             // 
+            // RoleSettingToolStripMenuItem
+            // 
+            this.RoleSettingToolStripMenuItem.Enabled = false;
+            this.RoleSettingToolStripMenuItem.Name = "RoleSettingToolStripMenuItem";
+            this.RoleSettingToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.RoleSettingToolStripMenuItem.Text = "ロール自動付与";
+            this.RoleSettingToolStripMenuItem.Click += new System.EventHandler(this.RoleSettingToolStripMenuItem_Click);
+            // 
             // WeatherInfoToolStripMenuItem
             // 
             this.WeatherInfoToolStripMenuItem.Enabled = false;
@@ -212,7 +222,9 @@
             // 
             this.ProductToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.VersionToolStripMenuItem,
-            this.LicenseToolStripMenuItem});
+            this.LicenseToolStripMenuItem,
+            this.UpdateCheckToolStripMenuItem,
+            this.tESTToolStripMenuItem});
             this.ProductToolStripMenuItem.Name = "ProductToolStripMenuItem";
             this.ProductToolStripMenuItem.Size = new System.Drawing.Size(84, 21);
             this.ProductToolStripMenuItem.Text = "製品情報";
@@ -220,16 +232,23 @@
             // VersionToolStripMenuItem
             // 
             this.VersionToolStripMenuItem.Name = "VersionToolStripMenuItem";
-            this.VersionToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.VersionToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.VersionToolStripMenuItem.Text = "Version情報";
             this.VersionToolStripMenuItem.Click += new System.EventHandler(this.VersionToolStripMenuItem_Click);
             // 
             // LicenseToolStripMenuItem
             // 
             this.LicenseToolStripMenuItem.Name = "LicenseToolStripMenuItem";
-            this.LicenseToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.LicenseToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.LicenseToolStripMenuItem.Text = "ライセンス認証";
             this.LicenseToolStripMenuItem.Click += new System.EventHandler(this.LicenseToolStripMenuItem_Click);
+            // 
+            // UpdateCheckToolStripMenuItem
+            // 
+            this.UpdateCheckToolStripMenuItem.Name = "UpdateCheckToolStripMenuItem";
+            this.UpdateCheckToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.UpdateCheckToolStripMenuItem.Text = "アップデート確認";
+            this.UpdateCheckToolStripMenuItem.Click += new System.EventHandler(this.UpdateCheckToolStripMenuItem_Click);
             // 
             // BtnReloadAllPlugins
             // 
@@ -279,13 +298,11 @@
             this.licenseCheckTimer.Interval = 60000;
             this.licenseCheckTimer.Tick += new System.EventHandler(this.licenseCheckTimer_Tick);
             // 
-            // RoleSettingToolStripMenuItem
+            // tESTToolStripMenuItem
             // 
-            this.RoleSettingToolStripMenuItem.Enabled = false;
-            this.RoleSettingToolStripMenuItem.Name = "RoleSettingToolStripMenuItem";
-            this.RoleSettingToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
-            this.RoleSettingToolStripMenuItem.Text = "ロール自動付与";
-            this.RoleSettingToolStripMenuItem.Click += new System.EventHandler(this.RoleSettingToolStripMenuItem_Click);
+            this.tESTToolStripMenuItem.Name = "tESTToolStripMenuItem";
+            this.tESTToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.tESTToolStripMenuItem.Text = "TEST";
             // 
             // MainForm
             // 
@@ -342,6 +359,8 @@
         private System.Windows.Forms.ToolStripMenuItem MessageBulkDeletionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem UserBanToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem RoleSettingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem UpdateCheckToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem tESTToolStripMenuItem;
     }
 }
 

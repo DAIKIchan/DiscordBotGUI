@@ -5,6 +5,9 @@
     <Setting Name="CmdConfigPath" Description="コマンドやBOTからの応答メッセージデータ" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\Project\DiscordBotGUI\DiscordBotGUI\bin\Debug</Value>
     </Setting>
+    <Setting Name="LogFilePath" Description="ログファイルのフォルダパス" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\DiscordBotGUI</Value>
+    </Setting>
     <Setting Name="FormSetting" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>

@@ -31,20 +31,26 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Setting));
             this.LblToken = new System.Windows.Forms.Label();
             this.TxtConfig = new System.Windows.Forms.TextBox();
-            this.BtnStart = new System.Windows.Forms.Button();
+            this.BtnOpenCmd = new System.Windows.Forms.Button();
             this.FormSetting = new System.Windows.Forms.CheckBox();
             this.BtnSave = new System.Windows.Forms.Button();
             this.ChkDeleteCommandMessage = new System.Windows.Forms.CheckBox();
             this.ChkDebugLog = new System.Windows.Forms.CheckBox();
             this.GrpLogSettings = new System.Windows.Forms.GroupBox();
+            this.ChkWriteLogFile = new System.Windows.Forms.CheckBox();
             this.LblUITaskDelayMs = new System.Windows.Forms.Label();
             this.NumUITaskDelayMs = new System.Windows.Forms.NumericUpDown();
             this.LblLogBatchSize = new System.Windows.Forms.Label();
             this.NumLogBatchSize = new System.Windows.Forms.NumericUpDown();
-            this.ChkWriteLogFile = new System.Windows.Forms.CheckBox();
+            this.LblLogFileSize = new System.Windows.Forms.Label();
+            this.NumLogFileSize = new System.Windows.Forms.NumericUpDown();
+            this.label1 = new System.Windows.Forms.Label();
+            this.TxtLogFolder = new System.Windows.Forms.TextBox();
+            this.BtnOpenFolder = new System.Windows.Forms.Button();
             this.GrpLogSettings.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.NumUITaskDelayMs)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.NumLogBatchSize)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumLogFileSize)).BeginInit();
             this.SuspendLayout();
             // 
             // LblToken
@@ -68,20 +74,20 @@
             this.TxtConfig.Size = new System.Drawing.Size(806, 23);
             this.TxtConfig.TabIndex = 2;
             // 
-            // BtnStart
+            // BtnOpenCmd
             // 
-            this.BtnStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.BtnStart.BackColor = System.Drawing.Color.RoyalBlue;
-            this.BtnStart.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.BtnStart.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.BtnStart.ForeColor = System.Drawing.Color.Transparent;
-            this.BtnStart.Location = new System.Drawing.Point(824, 33);
-            this.BtnStart.Name = "BtnStart";
-            this.BtnStart.Size = new System.Drawing.Size(48, 23);
-            this.BtnStart.TabIndex = 3;
-            this.BtnStart.Text = "参照";
-            this.BtnStart.UseVisualStyleBackColor = false;
-            this.BtnStart.Click += new System.EventHandler(this.BtnStart_Click);
+            this.BtnOpenCmd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.BtnOpenCmd.BackColor = System.Drawing.Color.RoyalBlue;
+            this.BtnOpenCmd.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.BtnOpenCmd.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BtnOpenCmd.ForeColor = System.Drawing.Color.Transparent;
+            this.BtnOpenCmd.Location = new System.Drawing.Point(824, 33);
+            this.BtnOpenCmd.Name = "BtnOpenCmd";
+            this.BtnOpenCmd.Size = new System.Drawing.Size(48, 23);
+            this.BtnOpenCmd.TabIndex = 3;
+            this.BtnOpenCmd.Text = "参照";
+            this.BtnOpenCmd.UseVisualStyleBackColor = false;
+            this.BtnOpenCmd.Click += new System.EventHandler(this.BtnOpenCmd_Click);
             // 
             // FormSetting
             // 
@@ -142,6 +148,11 @@
             this.GrpLogSettings.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.GrpLogSettings.Controls.Add(this.BtnOpenFolder);
+            this.GrpLogSettings.Controls.Add(this.TxtLogFolder);
+            this.GrpLogSettings.Controls.Add(this.label1);
+            this.GrpLogSettings.Controls.Add(this.NumLogFileSize);
+            this.GrpLogSettings.Controls.Add(this.LblLogFileSize);
             this.GrpLogSettings.Controls.Add(this.ChkWriteLogFile);
             this.GrpLogSettings.Controls.Add(this.LblUITaskDelayMs);
             this.GrpLogSettings.Controls.Add(this.NumUITaskDelayMs);
@@ -156,6 +167,20 @@
             this.GrpLogSettings.TabIndex = 21;
             this.GrpLogSettings.TabStop = false;
             this.GrpLogSettings.Text = "コンソールログ設定";
+            // 
+            // ChkWriteLogFile
+            // 
+            this.ChkWriteLogFile.AutoSize = true;
+            this.ChkWriteLogFile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.ChkWriteLogFile.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ChkWriteLogFile.ForeColor = System.Drawing.Color.Transparent;
+            this.ChkWriteLogFile.Location = new System.Drawing.Point(6, 138);
+            this.ChkWriteLogFile.Name = "ChkWriteLogFile";
+            this.ChkWriteLogFile.Size = new System.Drawing.Size(179, 25);
+            this.ChkWriteLogFile.TabIndex = 78;
+            this.ChkWriteLogFile.Text = "ログファイル出力を有効";
+            this.ChkWriteLogFile.UseVisualStyleBackColor = true;
+            this.ChkWriteLogFile.CheckedChanged += new System.EventHandler(this.ChkWriteLogFile_CheckedChanged);
             // 
             // LblUITaskDelayMs
             // 
@@ -225,18 +250,75 @@
             0,
             0});
             // 
-            // ChkWriteLogFile
+            // LblLogFileSize
             // 
-            this.ChkWriteLogFile.AutoSize = true;
-            this.ChkWriteLogFile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.ChkWriteLogFile.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ChkWriteLogFile.ForeColor = System.Drawing.Color.Transparent;
-            this.ChkWriteLogFile.Location = new System.Drawing.Point(6, 137);
-            this.ChkWriteLogFile.Name = "ChkWriteLogFile";
-            this.ChkWriteLogFile.Size = new System.Drawing.Size(179, 25);
-            this.ChkWriteLogFile.TabIndex = 78;
-            this.ChkWriteLogFile.Text = "ログファイル出力を有効";
-            this.ChkWriteLogFile.UseVisualStyleBackColor = true;
+            this.LblLogFileSize.AutoSize = true;
+            this.LblLogFileSize.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LblLogFileSize.Location = new System.Drawing.Point(6, 178);
+            this.LblLogFileSize.Name = "LblLogFileSize";
+            this.LblLogFileSize.Size = new System.Drawing.Size(156, 21);
+            this.LblLogFileSize.TabIndex = 79;
+            this.LblLogFileSize.Text = "ログファイル出力サイズ";
+            // 
+            // NumLogFileSize
+            // 
+            this.NumLogFileSize.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.NumLogFileSize.Location = new System.Drawing.Point(168, 178);
+            this.NumLogFileSize.Maximum = new decimal(new int[] {
+            5120,
+            0,
+            0,
+            0});
+            this.NumLogFileSize.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.NumLogFileSize.Name = "NumLogFileSize";
+            this.NumLogFileSize.Size = new System.Drawing.Size(81, 23);
+            this.NumLogFileSize.TabIndex = 80;
+            this.NumLogFileSize.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.NumLogFileSize.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.Transparent;
+            this.label1.Location = new System.Drawing.Point(6, 235);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(110, 21);
+            this.label1.TabIndex = 81;
+            this.label1.Text = "ログフォルダパス";
+            // 
+            // TxtLogFolder
+            // 
+            this.TxtLogFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.TxtLogFolder.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.TxtLogFolder.Location = new System.Drawing.Point(6, 259);
+            this.TxtLogFolder.Name = "TxtLogFolder";
+            this.TxtLogFolder.Size = new System.Drawing.Size(794, 23);
+            this.TxtLogFolder.TabIndex = 82;
+            // 
+            // BtnOpenFolder
+            // 
+            this.BtnOpenFolder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.BtnOpenFolder.BackColor = System.Drawing.Color.RoyalBlue;
+            this.BtnOpenFolder.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.BtnOpenFolder.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BtnOpenFolder.ForeColor = System.Drawing.Color.Transparent;
+            this.BtnOpenFolder.Location = new System.Drawing.Point(806, 259);
+            this.BtnOpenFolder.Name = "BtnOpenFolder";
+            this.BtnOpenFolder.Size = new System.Drawing.Size(48, 23);
+            this.BtnOpenFolder.TabIndex = 83;
+            this.BtnOpenFolder.Text = "参照";
+            this.BtnOpenFolder.UseVisualStyleBackColor = false;
+            this.BtnOpenFolder.Click += new System.EventHandler(this.BtnOpenFolder_Click);
             // 
             // Setting
             // 
@@ -248,11 +330,11 @@
             this.Controls.Add(this.ChkDeleteCommandMessage);
             this.Controls.Add(this.BtnSave);
             this.Controls.Add(this.FormSetting);
-            this.Controls.Add(this.BtnStart);
+            this.Controls.Add(this.BtnOpenCmd);
             this.Controls.Add(this.TxtConfig);
             this.Controls.Add(this.LblToken);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(350, 250);
+            this.MinimumSize = new System.Drawing.Size(350, 500);
             this.Name = "Setting";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "設定プロパティ";
@@ -263,6 +345,7 @@
             this.GrpLogSettings.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.NumUITaskDelayMs)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.NumLogBatchSize)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.NumLogFileSize)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -272,7 +355,7 @@
 
         private System.Windows.Forms.Label LblToken;
         private System.Windows.Forms.TextBox TxtConfig;
-        private System.Windows.Forms.Button BtnStart;
+        private System.Windows.Forms.Button BtnOpenCmd;
         private System.Windows.Forms.CheckBox FormSetting;
         private System.Windows.Forms.Button BtnSave;
         private System.Windows.Forms.CheckBox ChkDeleteCommandMessage;
@@ -283,5 +366,10 @@
         private System.Windows.Forms.Label LblLogBatchSize;
         private System.Windows.Forms.NumericUpDown NumLogBatchSize;
         private System.Windows.Forms.CheckBox ChkWriteLogFile;
+        private System.Windows.Forms.NumericUpDown NumLogFileSize;
+        private System.Windows.Forms.Label LblLogFileSize;
+        private System.Windows.Forms.Button BtnOpenFolder;
+        private System.Windows.Forms.TextBox TxtLogFolder;
+        private System.Windows.Forms.Label label1;
     }
 }
