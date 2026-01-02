@@ -1,0 +1,9 @@
+{
+  "DiscordBot.Plugin.QA.dll":"アンケート・QAプラグイン",
+  "DiscordBot.Plugin.Delete.dll":"メッセージ一括削除プラグイン",
+  "DiscordBot.Plugin.Ban.dll":"ユーザBAKプラグイン",
+  "DiscordBot.Plugin.Kick.dll":"ユーザKICKプラグイン",
+  "DiscordBot.Plugin.Weather.dll":"天気予報プラグイン",
+  "DiscordBot.Plugin.UserJoining_Leaving.dll":"入退室ログプラグイン",
+  "DiscordBot.Plugin.Role.dll":"ロール自動付与プラグイン",
+}

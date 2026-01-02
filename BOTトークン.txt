@@ -1,0 +1,32 @@
+DiscordBOT用API
+ODkwMTQ1MTYyOTQ3MzYyODE3.GZbK76.dpvDfhccrbW2PapecndUd58q8F-lyZMN9BCrLk
+
+天気予報用API
+dd5aa823e5737e1d0120245bb26a168e
+
+
+この時間（分）が経過するまで、天気情報は再取得されません。0分に設定すると、常に最新の情報を取得します。
+
+
+
+{
+
+  "LicenseInfo": [
+
+    {
+
+      "LicenseKey": "任意のライセンスキー(これは後付け)",
+
+      "HardwareId": "ハードウェアID",
+
+      "AppId": "アプリ内にハードコードされている任意のID(これは後付け)",
+
+      "DateTime": "有効期限(これは後付け)",
+
+      "LicenseType": "ライセンスの種類(これは後付け)"
+
+    }
+
+  ]
+
+}
